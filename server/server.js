@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import pdfRoutes from "./routes/pdfRoutes.js";
 
 dotenv.config();
 
@@ -35,6 +36,15 @@ app.get("/api/health", (req, res) => {
     database:
       mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
   });
+});
+
+// PDF routes
+app.use("/api/pdfs", pdfRoutes);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: err.message || "Something went wrong!" });
 });
 
 app.listen(PORT, () => {
