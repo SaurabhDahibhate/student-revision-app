@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import pdfRoutes from "./routes/pdfRoutes.js";
+import quizRoutes from "./routes/quizRoutes.js"; // ← ADD THIS LINE
 
 dotenv.config();
 
@@ -38,8 +39,8 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// PDF routes
 app.use("/api/pdfs", pdfRoutes);
+app.use("/api/quiz", quizRoutes); // ← ADD THIS LINE
 
 // Error handling middleware
 app.use((err, req, res, next) => {
