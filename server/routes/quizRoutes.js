@@ -3,6 +3,7 @@ import {
   createQuiz,
   submitQuiz,
   getQuizAttempts,
+  getProgressStats, // ADD THIS
 } from "../controllers/quizController.js";
 
 const router = express.Router();
@@ -15,5 +16,8 @@ router.post("/submit", submitQuiz);
 
 // Get quiz attempts history
 router.get("/attempts", getQuizAttempts);
+
+// Get progress statistics - ADD THIS
+router.get("/progress", getProgressStats);
 
 export default router;
