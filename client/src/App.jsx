@@ -4,6 +4,7 @@ import PDFUpload from "./components/PDFUpload";
 import PDFList from "./components/PDFList";
 import PDFViewer from "./components/PDFViewer";
 import Quiz from "./components/quiz/Quiz";
+import Dashboard from "./components/dashboard/Dashboard";
 import { getAllPDFs, generateQuiz } from "./services/api";
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
   const [currentQuiz, setCurrentQuiz] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generatingQuiz, setGeneratingQuiz] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/health")
@@ -32,6 +34,7 @@ function App() {
       const data = await getAllPDFs();
       setPdfs(data.pdfs);
     } catch (error) {
+      console.error("Failed to load PDFs:", error);
     } finally {
       setLoading(false);
     }
@@ -54,9 +57,9 @@ function App() {
 
     try {
       const result = await generateQuiz(pdf.id);
-
       setCurrentQuiz(result.quiz);
     } catch (error) {
+      console.error("Quiz generation error:", error);
       alert(
         "Failed to generate quiz: " +
           (error.response?.data?.error || error.message)
@@ -73,10 +76,23 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-8">
+        {/* Header with Dashboard Button */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            📚 Student Revision App
-          </h1>
+          <div className="flex items-center justify-between max-w-5xl mx-auto mb-4">
+            <div className="flex-1"></div>
+            <h1 className="text-4xl font-bold text-gray-800">
+              📚 Student Revision App
+            </h1>
+            <div className="flex-1 flex justify-end">
+              <button
+                onClick={() => setShowDashboard(true)}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 font-medium shadow-md"
+              >
+                <TrendingUp className="w-5 h-5" />
+                <span>Dashboard</span>
+              </button>
+            </div>
+          </div>
           <p className="text-gray-600">Your AI-powered study companion</p>
           <p className="text-sm text-gray-500 mt-2">
             Backend:{" "}
@@ -90,6 +106,7 @@ function App() {
           </p>
         </div>
 
+        {/* Feature Cards */}
         <div className="grid md:grid-cols-3 gap-6 mb-12 max-w-5xl mx-auto">
           <FeatureCard
             icon={<BookOpen className="w-10 h-10 text-blue-600" />}
@@ -105,9 +122,12 @@ function App() {
             icon={<TrendingUp className="w-10 h-10 text-green-600" />}
             title="Track Progress"
             description="Monitor your learning"
+            onClick={() => setShowDashboard(true)}
+            clickable
           />
         </div>
 
+        {/* Main Content */}
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-6">
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">
@@ -158,13 +178,21 @@ function App() {
 
       {/* Quiz Modal */}
       {currentQuiz && <Quiz quiz={currentQuiz} onClose={handleCloseQuiz} />}
+
+      {/* Dashboard Modal */}
+      {showDashboard && <Dashboard onClose={() => setShowDashboard(false)} />}
     </div>
   );
 }
 
-function FeatureCard({ icon, title, description }) {
+function FeatureCard({ icon, title, description, onClick, clickable }) {
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+    <div
+      onClick={clickable ? onClick : undefined}
+      className={`bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow ${
+        clickable ? "cursor-pointer hover:scale-105 transition-transform" : ""
+      }`}
+    >
       <div className="flex justify-center mb-3">{icon}</div>
       <h3 className="text-lg font-bold text-gray-800 mb-1 text-center">
         {title}

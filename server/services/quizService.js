@@ -1,8 +1,11 @@
-import OpenAI from "openai";
+import Groq from "groq-sdk";
 import PDF from "../models/PDF.js";
 
-// Set to true to use mock data instead of OpenAI
-const USE_MOCK_DATA = true; // ← Change to false when you have OpenAI credits
+// DON'T initialize here - do it inside the function
+// const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+// Set to true to use mock data instead of Groq
+const USE_MOCK_DATA = false; // ← Set to false to use real Groq AI
 
 export const generateQuiz = async (
   pdfId,
@@ -15,12 +18,11 @@ export const generateQuiz = async (
       throw new Error("PDF not found");
     }
 
-    // MOCK MODE - For testing without OpenAI credits
+    // MOCK MODE - For testing without AI
     if (USE_MOCK_DATA) {
-      console.log("🎭 Using MOCK quiz data (OpenAI bypassed)");
+      console.log("🎭 Using MOCK quiz data (AI bypassed)");
 
       const mockQuestions = [
-        // MCQs
         {
           type: "MCQ",
           question: "What is the main topic covered in this document?",
@@ -59,7 +61,6 @@ export const generateQuiz = async (
           correctAnswer: "Meters and seconds",
           explanation: "SI units are standard in physics documentation.",
         },
-        // SAQs
         {
           type: "SAQ",
           question: "Define velocity in your own words.",
@@ -77,16 +78,15 @@ export const generateQuiz = async (
           explanation:
             "This is Newton's second law of motion, fundamental to classical mechanics.",
         },
-        // LAQ
         {
           type: "LAQ",
           question:
             "Explain the concept of momentum and how it relates to collisions.",
           options: [],
           correctAnswer:
-            "Momentum is the product of mass and velocity. In collisions, the total momentum of a system is conserved, meaning the total momentum before collision equals the total momentum after collision.",
+            "Momentum is the product of mass and velocity. In collisions, the total momentum of a system is conserved.",
           explanation:
-            "The law of conservation of momentum states that in a closed system, momentum remains constant. This principle is crucial for understanding elastic and inelastic collisions.",
+            "The law of conservation of momentum states that in a closed system, momentum remains constant.",
         },
       ];
 
@@ -97,9 +97,12 @@ export const generateQuiz = async (
       };
     }
 
-    // REAL OPENAI MODE - Below code runs when USE_MOCK_DATA = false
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+    // REAL GROQ AI MODE - Initialize Groq client here
+    console.log("🤖 Using Groq AI for quiz generation");
+
+    // Initialize Groq client INSIDE the function
+    const groq = new Groq({
+      apiKey: process.env.GROQ_API_KEY,
     });
 
     // Extract text (limit to 3000 chars to avoid token limits)
@@ -111,7 +114,7 @@ export const generateQuiz = async (
       );
     }
 
-    // Create prompt for OpenAI
+    // Create prompt for Groq
     const prompt = `You are an expert educator creating a quiz from study material.
 
 Based on the following text from a student's coursebook, generate a quiz with:
@@ -156,9 +159,9 @@ Rules:
 - Ensure questions are unambiguous
 - Return ONLY the JSON object, no markdown formatting`;
 
-    // Call OpenAI API
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+    // Call Groq API
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.1-8b-instant", // Fast and FREE model
       messages: [
         {
           role: "system",
@@ -177,6 +180,8 @@ Rules:
     // Parse response
     const responseText = completion.choices[0].message.content.trim();
 
+    console.log("📝 Groq Response received, parsing...");
+
     // Remove markdown code blocks if present
     const jsonText = responseText
       .replace(/```json\n?/g, "")
@@ -185,13 +190,15 @@ Rules:
 
     const quizData = JSON.parse(jsonText);
 
+    console.log("✅ Quiz generated successfully with Groq AI");
+
     return {
       pdfId: pdf._id,
       pdfName: pdf.originalName,
       questions: quizData.questions,
     };
   } catch (error) {
-    console.error("Quiz generation error:", error);
+    console.error("❌ Quiz generation error:", error);
     throw new Error(`Failed to generate quiz: ${error.message}`);
   }
 };

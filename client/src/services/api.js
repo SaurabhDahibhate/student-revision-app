@@ -39,7 +39,7 @@ export const deletePDF = async (id) => {
   return response.data;
 };
 
-// Quiz APIs - ADD THESE
+// Quiz APIs
 export const generateQuiz = async (
   pdfId,
   questionTypes = { MCQ: 3, SAQ: 2, LAQ: 1 }
@@ -56,6 +56,12 @@ export const submitQuiz = async (quizId, answers) => {
 export const getQuizAttempts = async (pdfId = null) => {
   const params = pdfId ? { pdfId } : {};
   const response = await api.get("/quiz/attempts", { params });
+  return response.data;
+};
+
+// Progress API - ADD THIS
+export const getProgressStats = async () => {
+  const response = await api.get("/quiz/progress");
   return response.data;
 };
 
