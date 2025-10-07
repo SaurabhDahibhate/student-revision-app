@@ -3,16 +3,18 @@ import { BookOpen, Brain, TrendingUp } from "lucide-react";
 import PDFUpload from "./components/PDFUpload";
 import PDFList from "./components/PDFList";
 import PDFViewer from "./components/PDFViewer";
-import { getAllPDFs } from "./services/api";
+import Quiz from "./components/quiz/Quiz";
+import { getAllPDFs, generateQuiz } from "./services/api";
 
 function App() {
   const [backendStatus, setBackendStatus] = useState("Checking...");
   const [pdfs, setPdfs] = useState([]);
   const [selectedPdf, setSelectedPdf] = useState(null);
+  const [currentQuiz, setCurrentQuiz] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [generatingQuiz, setGeneratingQuiz] = useState(false);
 
   useEffect(() => {
-    // Test backend connection
     fetch("http://localhost:5000/api/health")
       .then((res) => res.json())
       .then((data) => {
@@ -22,7 +24,6 @@ function App() {
         setBackendStatus("❌ Backend not connected");
       });
 
-    // Load PDFs
     loadPDFs();
   }, []);
 
@@ -31,7 +32,6 @@ function App() {
       const data = await getAllPDFs();
       setPdfs(data.pdfs);
     } catch (error) {
-      console.error("Failed to load PDFs:", error);
     } finally {
       setLoading(false);
     }
@@ -49,10 +49,30 @@ function App() {
     setSelectedPdf(pdf);
   };
 
+  const handleGenerateQuiz = async (pdf) => {
+    setGeneratingQuiz(true);
+
+    try {
+      const result = await generateQuiz(pdf.id);
+
+      setCurrentQuiz(result.quiz);
+    } catch (error) {
+      alert(
+        "Failed to generate quiz: " +
+          (error.response?.data?.error || error.message)
+      );
+    } finally {
+      setGeneratingQuiz(false);
+    }
+  };
+
+  const handleCloseQuiz = () => {
+    setCurrentQuiz(null);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
             📚 Student Revision App
@@ -70,7 +90,6 @@ function App() {
           </p>
         </div>
 
-        {/* Feature Cards */}
         <div className="grid md:grid-cols-3 gap-6 mb-12 max-w-5xl mx-auto">
           <FeatureCard
             icon={<BookOpen className="w-10 h-10 text-blue-600" />}
@@ -89,9 +108,7 @@ function App() {
           />
         </div>
 
-        {/* Main Content */}
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-6">
-          {/* Upload Section */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">
               Upload PDF
@@ -99,7 +116,6 @@ function App() {
             <PDFUpload onUploadSuccess={handleUploadSuccess} />
           </div>
 
-          {/* PDF List Section */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">
               My PDFs ({pdfs.length})
@@ -111,6 +127,7 @@ function App() {
                 pdfs={pdfs}
                 onDelete={handleDelete}
                 onView={handleView}
+                onGenerateQuiz={handleGenerateQuiz}
               />
             )}
           </div>
@@ -118,25 +135,29 @@ function App() {
       </div>
 
       {/* PDF Viewer Modal */}
-      {selectedPdf && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 9999,
-          }}
-        >
-          <PDFViewer
-            pdf={selectedPdf}
-            onClose={() => {
-              setSelectedPdf(null);
-            }}
-          />
+      {selectedPdf && !currentQuiz && (
+        <PDFViewer pdf={selectedPdf} onClose={() => setSelectedPdf(null)} />
+      )}
+
+      {/* Generating Quiz Loading */}
+      {generatingQuiz && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-8 max-w-md">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-purple-600 mx-auto mb-4"></div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                Generating Quiz...
+              </h3>
+              <p className="text-gray-600">
+                AI is analyzing your PDF and creating questions
+              </p>
+            </div>
+          </div>
         </div>
       )}
+
+      {/* Quiz Modal */}
+      {currentQuiz && <Quiz quiz={currentQuiz} onClose={handleCloseQuiz} />}
     </div>
   );
 }

@@ -1,7 +1,7 @@
-import { File, Trash2, Eye } from "lucide-react";
+import { File, Trash2, Eye, Brain } from "lucide-react";
 import { deletePDF } from "../services/api";
 
-export default function PDFList({ pdfs, onDelete, onView }) {
+export default function PDFList({ pdfs, onDelete, onView, onGenerateQuiz }) {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this PDF?")) {
       try {
@@ -41,44 +41,65 @@ export default function PDFList({ pdfs, onDelete, onView }) {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {pdfs.map((pdf) => (
         <div
           key={pdf.id}
-          className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+          className="border-2 border-gray-300 rounded-lg p-4 bg-gray-50"
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 flex-1">
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <File className="w-6 h-6 text-blue-600" />
-              </div>
-
-              <div className="flex-1">
-                <h3 className="font-medium text-gray-800">{pdf.name}</h3>
-                <div className="flex gap-4 text-sm text-gray-500 mt-1">
-                  <span>{pdf.pages} pages</span>
-                  <span>•</span>
-                  <span>{formatFileSize(pdf.size)}</span>
-                  <span>•</span>
-                  <span>{formatDate(pdf.uploadedAt)}</span>
-                </div>
+          {/* PDF Header */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-blue-100 rounded">
+              <File className="w-6 h-6 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-gray-900">{pdf.name}</h3>
+              <div className="flex gap-2 text-xs text-gray-500 mt-1">
+                <span>{pdf.pages} pages</span>
+                <span>•</span>
+                <span>{formatFileSize(pdf.size)}</span>
+                <span>•</span>
+                <span>{formatDate(pdf.uploadedAt)}</span>
               </div>
             </div>
+          </div>
 
+          {/* Buttons */}
+          <div className="space-y-2">
+            {/* GENERATE QUIZ BUTTON - FULL WIDTH */}
+            <button
+              onClick={() => {
+                if (onGenerateQuiz) {
+                  onGenerateQuiz(pdf);
+                }
+              }}
+              className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg flex items-center justify-center gap-2"
+              style={{ cursor: "pointer" }}
+            >
+              <Brain className="w-5 h-5" />
+              <span>Generate Quiz</span>
+            </button>
+
+            {/* VIEW AND DELETE BUTTONS */}
             <div className="flex gap-2">
               <button
-                onClick={() => onView(pdf)}
-                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                title="View PDF"
+                onClick={() => {
+                  onView(pdf);
+                }}
+                className="flex-1 py-2 px-3 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg flex items-center justify-center gap-2"
               >
-                <Eye className="w-5 h-5" />
+                <Eye className="w-4 h-4" />
+                <span className="text-sm">View</span>
               </button>
+
               <button
-                onClick={() => handleDelete(pdf.id)}
-                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                title="Delete PDF"
+                onClick={() => {
+                  handleDelete(pdf.id);
+                }}
+                className="flex-1 py-2 px-3 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg flex items-center justify-center gap-2"
               >
-                <Trash2 className="w-5 h-5" />
+                <Trash2 className="w-4 h-4" />
+                <span className="text-sm">Delete</span>
               </button>
             </div>
           </div>
