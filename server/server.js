@@ -4,7 +4,8 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import pdfRoutes from "./routes/pdfRoutes.js";
 import quizRoutes from "./routes/quizRoutes.js";
-import chatRoutes from "./routes/chatRoutes.js"; // ADD THIS
+import chatRoutes from "./routes/chatRoutes.js";
+import youtubeRoutes from "./routes/youtubeRoutes.js"; 
 
 dotenv.config();
 
@@ -39,7 +40,8 @@ app.get("/api/health", (req, res) => {
 
 app.use("/api/pdfs", pdfRoutes);
 app.use("/api/quiz", quizRoutes);
-app.use("/api/chats", chatRoutes); // ADD THIS
+app.use("/api/chats", chatRoutes);
+app.use("/api/youtube", youtubeRoutes); // ADD THIS
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
