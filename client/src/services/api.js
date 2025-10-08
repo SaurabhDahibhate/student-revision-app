@@ -59,9 +59,38 @@ export const getQuizAttempts = async (pdfId = null) => {
   return response.data;
 };
 
-// Progress API - ADD THIS
 export const getProgressStats = async () => {
   const response = await api.get("/quiz/progress");
+  return response.data;
+};
+
+// Chat APIs
+export const createChat = async (
+  title = "New Conversation",
+  pdfId = null,
+  pdfName = null
+) => {
+  const response = await api.post("/chats", { title, pdfId, pdfName });
+  return response.data;
+};
+
+export const getAllChats = async () => {
+  const response = await api.get("/chats");
+  return response.data;
+};
+
+export const getChatById = async (id) => {
+  const response = await api.get(`/chats/${id}`);
+  return response.data;
+};
+
+export const sendChatMessage = async (chatId, message) => {
+  const response = await api.post(`/chats/${chatId}/message`, { message });
+  return response.data;
+};
+
+export const deleteChat = async (id) => {
+  const response = await api.delete(`/chats/${id}`);
   return response.data;
 };
 
