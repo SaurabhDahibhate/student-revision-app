@@ -10,49 +10,60 @@ export const generateChatResponse = async (messages, pdfId = null) => {
 
     let systemPrompt =
       "You are a helpful AI teaching assistant. You help students understand their study materials, answer questions clearly, and provide educational explanations.";
-    let contextInfo = "";
 
-    // If there's a PDF context, use RAG
+    // If there's a PDF context, use RAG (if embeddings exist)
     if (pdfId) {
       const pdf = await PDF.findById(pdfId);
       if (pdf && pdf.chunks && pdf.chunks.length > 0) {
-        // Get the last user message
         const lastUserMessage = messages[messages.length - 1]?.content || "";
 
         if (lastUserMessage) {
-          console.log("🔍 Performing RAG search...");
+          // Check if embeddings exist
+          const hasEmbeddings =
+            pdf.chunks[0].embedding && pdf.chunks[0].embedding.length > 0;
 
-          // Create embedding for user query
-          const queryEmbedding = await createEmbedding(lastUserMessage);
+          if (hasEmbeddings && process.env.OPENAI_API_KEY) {
+            console.log("🔍 Performing RAG search with embeddings...");
 
-          // Find most relevant chunks
-          const chunksWithScores = pdf.chunks.map((chunk) => ({
-            ...chunk.toObject(),
-            similarity: cosineSimilarity(queryEmbedding, chunk.embedding),
-          }));
+            try {
+              const queryEmbedding = await createEmbedding(lastUserMessage);
 
-          // Sort by similarity and get top 3
-          const topChunks = chunksWithScores
-            .sort((a, b) => b.similarity - a.similarity)
-            .slice(0, 3);
+              const chunksWithScores = pdf.chunks.map((chunk) => ({
+                ...chunk.toObject(),
+                similarity: cosineSimilarity(queryEmbedding, chunk.embedding),
+              }));
 
-          console.log(`📚 Found ${topChunks.length} relevant chunks`);
+              const topChunks = chunksWithScores
+                .sort((a, b) => b.similarity - a.similarity)
+                .slice(0, 3);
 
-          // Build context with citations
-          contextInfo = "\n\nRelevant information from the PDF:\n\n";
-          topChunks.forEach((chunk, index) => {
-            contextInfo += `[Source: Page ${
-              chunk.pageNumber
-            }]\n"${chunk.text.substring(0, 200)}..."\n\n`;
-          });
+              console.log(`📚 Found ${topChunks.length} relevant chunks`);
 
-          systemPrompt += `\n\nContext from the student's PDF (${pdf.originalName}):${contextInfo}`;
-          systemPrompt += `\n\nIMPORTANT: When answering, cite the page numbers from the sources above. Use format: "According to page X: [quote snippet]"`;
+              let contextInfo = "\n\nRelevant information from the PDF:\n\n";
+              topChunks.forEach((chunk) => {
+                contextInfo += `[Source: Page ${
+                  chunk.pageNumber
+                }]\n"${chunk.text.substring(0, 200)}..."\n\n`;
+              });
+
+              systemPrompt += `\n\nContext from ${pdf.originalName}:${contextInfo}`;
+              systemPrompt += `\n\nIMPORTANT: Cite page numbers when answering. Format: "According to page X: [quote]"`;
+            } catch (error) {
+              console.error("RAG search error:", error.message);
+              // Fall back to basic context
+              const contextText = pdf.textContent.substring(0, 2000);
+              systemPrompt += `\n\nContext from ${pdf.originalName}:\n${contextText}`;
+            }
+          } else {
+            // For No embeddings then use simple text context
+            console.log("📄 Using simple text context (no embeddings)");
+            const contextText = pdf.textContent.substring(0, 2000);
+            systemPrompt += `\n\nContext from ${pdf.originalName}:\n${contextText}\n\nUse this context when relevant.`;
+          }
         }
       }
     }
 
-    // Format messages for Groq
     const groqMessages = [
       {
         role: "system",
@@ -64,7 +75,6 @@ export const generateChatResponse = async (messages, pdfId = null) => {
       })),
     ];
 
-    // Call Groq API
     const completion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: groqMessages,

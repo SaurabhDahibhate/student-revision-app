@@ -64,39 +64,59 @@ export const uploadPDF = async (req, res) => {
       size: req.file.size,
     });
 
-    // CREATE CHUNKS AND EMBEDDINGS
-    console.log("🔍 Creating chunks and embeddings...");
+    // CREATE CHUNKS (optional embeddings)
+    console.log("📦 Creating text chunks...");
     const chunks = chunkText(textContent, 300, 50);
-    console.log(`📦 Created ${chunks.length} chunks`);
+    console.log(`✅ Created ${chunks.length} chunks`);
 
-    // Create embeddings for each chunk (limit to first 50 chunks for performance)
-    const chunksToEmbed = chunks.slice(0, 50);
     const chunksWithEmbeddings = [];
 
-    for (let i = 0; i < chunksToEmbed.length; i++) {
-      try {
-        const embedding = await createEmbedding(chunksToEmbed[i].text);
+    // Only create embeddings if OpenAI key is available
+    if (process.env.OPENAI_API_KEY) {
+      console.log("🔍 Creating embeddings (this may take a minute)...");
+      const chunksToEmbed = chunks.slice(0, 20); // Reduced to 20 for speed
 
-        // Estimate page number (rough approximation)
-        const estimatedPage = Math.ceil((i / chunksToEmbed.length) * pageCount);
+      for (let i = 0; i < chunksToEmbed.length; i++) {
+        try {
+          const embedding = await createEmbedding(chunksToEmbed[i].text);
 
-        chunksWithEmbeddings.push({
-          text: chunksToEmbed[i].text,
-          embedding: embedding,
-          pageNumber: estimatedPage,
-          startIndex: chunksToEmbed[i].startIndex,
-          endIndex: chunksToEmbed[i].endIndex,
-        });
+          const estimatedPage = Math.ceil(
+            (i / chunksToEmbed.length) * pageCount
+          );
 
-        if ((i + 1) % 10 === 0) {
-          console.log(`  ✅ Embedded ${i + 1}/${chunksToEmbed.length} chunks`);
+          chunksWithEmbeddings.push({
+            text: chunksToEmbed[i].text,
+            embedding: embedding,
+            pageNumber: estimatedPage,
+            startIndex: chunksToEmbed[i].startIndex,
+            endIndex: chunksToEmbed[i].endIndex,
+          });
+
+          if ((i + 1) % 5 === 0) {
+            console.log(
+              `  ✅ Embedded ${i + 1}/${chunksToEmbed.length} chunks`
+            );
+          }
+        } catch (error) {
+          console.error(`  ⚠️ Error embedding chunk ${i}:`, error.message);
         }
-      } catch (error) {
-        console.error(`  ❌ Error embedding chunk ${i}:`, error.message);
       }
-    }
 
-    console.log(`✅ Created ${chunksWithEmbeddings.length} embeddings`);
+      console.log(`✅ Created ${chunksWithEmbeddings.length} embeddings`);
+    } else {
+      console.log("⚠️ No OpenAI API key - skipping embeddings (RAG disabled)");
+      // Store chunks without embeddings
+      chunks.slice(0, 20).forEach((chunk, i) => {
+        const estimatedPage = Math.ceil((i / 20) * pageCount);
+        chunksWithEmbeddings.push({
+          text: chunk.text,
+          embedding: [],
+          pageNumber: estimatedPage,
+          startIndex: chunk.startIndex,
+          endIndex: chunk.endIndex,
+        });
+      });
+    }
 
     // Save PDF metadata to database
     const newPDF = new PDF({

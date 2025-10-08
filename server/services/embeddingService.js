@@ -1,29 +1,25 @@
-import { pipeline } from "@xenova/transformers";
+import OpenAI from "openai";
 
-let embedder = null;
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || process.env.GROQ_API_KEY,
+});
 
-// Initialize embedder (lazy loading)
-async function getEmbedder() {
-  if (!embedder) {
-    console.log("📦 Loading embedding model...");
-    embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
-    console.log("✅ Embedding model loaded");
-  }
-  return embedder;
-}
-
-// Create embedding for text
+// Create embedding for text using OpenAI
 export async function createEmbedding(text) {
   try {
-    const embedderModel = await getEmbedder();
-    const output = await embedderModel(text, {
-      pooling: "mean",
-      normalize: true,
+    // Truncate text if too long (max 8000 tokens ≈ 6000 words)
+    const truncatedText = text.substring(0, 6000);
+
+    const response = await openai.embeddings.create({
+      model: "text-embedding-3-small", // Free tier model
+      input: truncatedText,
     });
-    return Array.from(output.data);
+
+    return response.data[0].embedding;
   } catch (error) {
-    console.error("Embedding error:", error);
-    throw error;
+    console.error("Embedding error:", error.message);
+    // Return empty embedding on error to prevent crash
+    return new Array(1536).fill(0);
   }
 }
 
