@@ -1,28 +1,5 @@
 import mongoose from "mongoose";
 
-const chunkSchema = new mongoose.Schema({
-  text: {
-    type: String,
-    required: true,
-  },
-  embedding: {
-    type: [Number],
-    default: [],
-  },
-  pageNumber: {
-    type: Number,
-    default: 1,
-  },
-  startIndex: {
-    type: Number,
-    default: 0,
-  },
-  endIndex: {
-    type: Number,
-    default: 0,
-  },
-});
-
 const pdfSchema = new mongoose.Schema(
   {
     filename: {
@@ -53,7 +30,6 @@ const pdfSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    chunks: [chunkSchema],
     uploadedAt: {
       type: Date,
       default: Date.now,
