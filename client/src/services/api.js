@@ -94,4 +94,10 @@ export const deleteChat = async (id) => {
   return response.data;
 };
 
+// YouTube APIs
+export const getYouTubeRecommendations = async (pdfId) => {
+  const response = await api.get(`/youtube/${pdfId}`);
+  return response.data;
+};
+
 export default api;

@@ -1,14 +1,14 @@
 import axios from "axios";
 
-const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 const YOUTUBE_API_URL = "https://www.googleapis.com/youtube/v3/search";
+
+// DON'T read env var here - read it inside the function
+// const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY; 
 
 // Extract key topics from PDF text
 function extractTopics(text, pdfName) {
-  // Simple topic extraction - take first 500 chars and PDF name
   const snippet = text.substring(0, 500);
 
-  // Basic keyword extraction (you can make this smarter)
   const words = snippet.split(/\s+/);
   const commonWords = [
     "the",
@@ -32,37 +32,42 @@ function extractTopics(text, pdfName) {
     )
     .slice(0, 5);
 
-  // Combine PDF name and keywords for better search
   const searchQuery = `${pdfName.replace(".pdf", "")} ${keywords.join(
     " "
   )} tutorial explanation`;
 
-  return searchQuery.substring(0, 100); // Limit query length
+  return searchQuery.substring(0, 100);
 }
 
 // Search YouTube for educational videos
 export async function searchYouTubeVideos(pdfId, PDF) {
   try {
-    // Get PDF details
+    // Read API key HERE, inside the function (after dotenv has loaded)
+    const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+
+    console.log(
+      "🔑 YouTube API Key in function:",
+      YOUTUBE_API_KEY
+        ? `✅ Yes (${YOUTUBE_API_KEY.substring(0, 10)}...)`
+        : "❌ No"
+    );
+
     const pdf = await PDF.findById(pdfId);
     if (!pdf) {
       throw new Error("PDF not found");
     }
 
-    // Check if YouTube API key exists
     if (!YOUTUBE_API_KEY) {
-      console.log("⚠️ No YouTube API key - returning sample data");
+      console.log("⚠️ No YouTube API key - returning empty results");
       return {
         query: pdf.originalName,
         videos: [],
       };
     }
 
-    // Extract topics from PDF
     const searchQuery = extractTopics(pdf.textContent, pdf.originalName);
     console.log("🔍 YouTube search query:", searchQuery);
 
-    // Call YouTube API
     const response = await axios.get(YOUTUBE_API_URL, {
       params: {
         part: "snippet",
@@ -70,13 +75,12 @@ export async function searchYouTubeVideos(pdfId, PDF) {
         type: "video",
         maxResults: 6,
         key: YOUTUBE_API_KEY,
-        videoCategoryId: "27", // Education category
+        videoCategoryId: "27",
         relevanceLanguage: "en",
         safeSearch: "strict",
       },
     });
 
-    // Format results
     const videos = response.data.items.map((item) => ({
       id: item.id.videoId,
       title: item.snippet.title,
@@ -96,7 +100,6 @@ export async function searchYouTubeVideos(pdfId, PDF) {
   } catch (error) {
     console.error("YouTube search error:", error.message);
 
-    // Return empty results on error
     return {
       query: "",
       videos: [],

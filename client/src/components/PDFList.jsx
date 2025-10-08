@@ -1,7 +1,13 @@
-import { File, Trash2, Eye, Brain } from "lucide-react";
+import { File, Trash2, Eye, Brain, Youtube } from "lucide-react";
 import { deletePDF } from "../services/api";
 
-export default function PDFList({ pdfs, onDelete, onView, onGenerateQuiz }) {
+export default function PDFList({
+  pdfs,
+  onDelete,
+  onView,
+  onGenerateQuiz,
+  onYouTubeRecommend,
+}) {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this PDF?")) {
       try {
@@ -67,6 +73,18 @@ export default function PDFList({ pdfs, onDelete, onView, onGenerateQuiz }) {
           {/* Buttons */}
           <div className="space-y-2">
             {/* GENERATE QUIZ BUTTON - FULL WIDTH */}
+            <button
+              onClick={() => {
+                if (onYouTubeRecommend) {
+                  onYouTubeRecommend(pdf);
+                }
+              }}
+              className="w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg flex items-center justify-center gap-2"
+            >
+              <Youtube className="w-5 h-5" />
+              <span>Find Videos</span>
+            </button>
+
             <button
               onClick={() => {
                 if (onGenerateQuiz) {

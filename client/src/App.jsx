@@ -7,6 +7,7 @@ import Quiz from "./components/quiz/Quiz";
 import Dashboard from "./components/dashboard/Dashboard";
 import ChatInterface from "./components/chat/ChatInterface";
 import { getAllPDFs, generateQuiz } from "./services/api";
+import YouTubeRecommender from "./components/youtube/YouTubeRecommender";
 
 function App() {
   const [backendStatus, setBackendStatus] = useState("Checking...");
@@ -17,6 +18,8 @@ function App() {
   const [generatingQuiz, setGeneratingQuiz] = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [showYouTube, setShowYouTube] = useState(false);
+  const [youtubePdf, setYoutubePdf] = useState(null);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/health")
@@ -73,6 +76,11 @@ function App() {
 
   const handleCloseQuiz = () => {
     setCurrentQuiz(null);
+  };
+
+  const handleYouTubeRecommend = (pdf) => {
+    setYoutubePdf(pdf);
+    setShowYouTube(true);
   };
 
   return (
@@ -163,6 +171,7 @@ function App() {
                 onDelete={handleDelete}
                 onView={handleView}
                 onGenerateQuiz={handleGenerateQuiz}
+                onYouTubeRecommend={handleYouTubeRecommend}
               />
             )}
           </div>
@@ -199,6 +208,17 @@ function App() {
 
       {/* Chat Interface */}
       {showChat && <ChatInterface onClose={() => setShowChat(false)} />}
+
+      {/* YouTube Recommender Modal */}
+      {showYouTube && youtubePdf && (
+        <YouTubeRecommender
+          pdf={youtubePdf}
+          onClose={() => {
+            setShowYouTube(false);
+            setYoutubePdf(null);
+          }}
+        />
+      )}
     </div>
   );
 }
