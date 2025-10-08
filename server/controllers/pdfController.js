@@ -2,6 +2,7 @@ import PDF from "../models/PDF.js";
 import fs from "fs";
 import path from "path";
 import { PDFDocument } from "pdf-lib";
+import { chunkText, createEmbedding } from "../services/embeddingService.js";
 
 // Fix for pdf-parse CommonJS module
 import { createRequire } from "module";
@@ -62,6 +63,40 @@ export const uploadPDF = async (req, res) => {
       textLength: textContent.length,
       size: req.file.size,
     });
+
+    // CREATE CHUNKS AND EMBEDDINGS
+    console.log("🔍 Creating chunks and embeddings...");
+    const chunks = chunkText(textContent, 300, 50);
+    console.log(`📦 Created ${chunks.length} chunks`);
+
+    // Create embeddings for each chunk (limit to first 50 chunks for performance)
+    const chunksToEmbed = chunks.slice(0, 50);
+    const chunksWithEmbeddings = [];
+
+    for (let i = 0; i < chunksToEmbed.length; i++) {
+      try {
+        const embedding = await createEmbedding(chunksToEmbed[i].text);
+
+        // Estimate page number (rough approximation)
+        const estimatedPage = Math.ceil((i / chunksToEmbed.length) * pageCount);
+
+        chunksWithEmbeddings.push({
+          text: chunksToEmbed[i].text,
+          embedding: embedding,
+          pageNumber: estimatedPage,
+          startIndex: chunksToEmbed[i].startIndex,
+          endIndex: chunksToEmbed[i].endIndex,
+        });
+
+        if ((i + 1) % 10 === 0) {
+          console.log(`  ✅ Embedded ${i + 1}/${chunksToEmbed.length} chunks`);
+        }
+      } catch (error) {
+        console.error(`  ❌ Error embedding chunk ${i}:`, error.message);
+      }
+    }
+
+    console.log(`✅ Created ${chunksWithEmbeddings.length} embeddings`);
 
     // Save PDF metadata to database
     const newPDF = new PDF({
