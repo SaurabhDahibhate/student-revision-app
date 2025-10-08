@@ -26,7 +26,9 @@ export default function ChatInterface({
   }, []);
 
   useEffect(() => {
-    scrollToBottom();
+    if (currentChat?.messages) {
+      scrollToBottom();
+    }
   }, [currentChat?.messages]);
 
   const scrollToBottom = () => {
@@ -232,7 +234,9 @@ export default function ChatInterface({
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {currentChat?.messages.length === 0 ? (
+          {!currentChat ||
+          !currentChat.messages ||
+          currentChat.messages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <MessageSquare className="w-16 h-16 mx-auto text-gray-300 mb-4" />
