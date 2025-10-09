@@ -28,7 +28,12 @@ function App() {
   const [youtubePdf, setYoutubePdf] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/health")
+    fetch(
+      `${
+        import.meta.env.VITE_API_URL?.replace("/api", "") ||
+        "http://localhost:5000"
+      }/api/health`
+    )
       .then((res) => res.json())
       .then((data) => {
         setBackendStatus(`✅ ${data.status}`);
