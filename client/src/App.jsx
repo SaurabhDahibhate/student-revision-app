@@ -147,7 +147,7 @@ function App() {
             </button>
           </div>
 
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-md">
+          {/* <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-md">
             <div
               className={`w-2 h-2 rounded-full ${
                 backendStatus.includes("✅")
@@ -155,7 +155,7 @@ function App() {
                   : "bg-red-500"
               }`}
             ></div>
-            {/* <span className="text-sm font-medium text-gray-700">
+            /* <span className="text-sm font-medium text-gray-700">
               {backendStatus}
             </span> */}
           </div>
