@@ -43,51 +43,40 @@ export const submitQuiz = async (req, res) => {
   try {
     const { quizId, answers } = req.body;
 
-    const quiz = await Quiz.findById(quizId);
+    const quiz = await Quiz.findById(quizId).populate("pdfId");
     if (!quiz) {
       return res.status(404).json({ error: "Quiz not found" });
     }
 
-    // Calculate score
-    const results = answers
-      .map((userAnswer) => {
-        const question = quiz.questions.id(userAnswer.questionId);
-        if (!question) return null;
+    let correctCount = 0;
+    const processedAnswers = [];
 
-        const isCorrect =
-          userAnswer.answer.trim().toLowerCase() ===
-          question.correctAnswer.trim().toLowerCase();
+    // Process each answer
+    for (const [questionIndex, userAnswer] of Object.entries(answers)) {
+      const question = quiz.questions[parseInt(questionIndex)];
+      const isCorrect = userAnswer === question.correctAnswer;
 
-        return {
-          questionId: question._id,
-          question: question.question,
-          type: question.type,
-          options: question.options,
-          userAnswer: userAnswer.answer,
-          correctAnswer: question.correctAnswer,
-          explanation: question.explanation,
-          isCorrect,
-        };
-      })
-      .filter((r) => r !== null);
+      if (isCorrect) correctCount++;
 
-    const correctCount = results.filter((r) => r.isCorrect).length;
-    const totalQuestions = results.length;
+      processedAnswers.push({
+        questionId: quiz._id.toString() + "-" + questionIndex,
+        userAnswer: userAnswer,
+        correctAnswer: question.correctAnswer,
+        isCorrect: isCorrect,
+      });
+    }
+
+    const totalQuestions = quiz.questions.length;
     const percentage = Math.round((correctCount / totalQuestions) * 100);
 
-    // Save attempt
     const attempt = new QuizAttempt({
       quizId: quiz._id,
-      pdfId: quiz.pdfId,
-      answers: results.map((r) => ({
-        questionId: r.questionId,
-        userAnswer: r.userAnswer,
-        correctAnswer: r.correctAnswer,
-        isCorrect: r.isCorrect,
-      })),
+      pdfId: quiz.pdfId._id,
+      pdfName: quiz.pdfId.originalName,
       score: correctCount,
-      totalQuestions,
-      percentage,
+      totalQuestions: totalQuestions,
+      percentage: percentage,
+      answers: processedAnswers,
     });
 
     await attempt.save();
@@ -95,11 +84,11 @@ export const submitQuiz = async (req, res) => {
     res.json({
       message: "Quiz submitted successfully",
       result: {
-        attemptId: attempt._id,
         score: correctCount,
-        totalQuestions,
-        percentage,
-        results,
+        totalQuestions: totalQuestions,
+        percentage: percentage,
+        correctAnswers: correctCount,
+        incorrectAnswers: totalQuestions - correctCount,
       },
     });
   } catch (error) {

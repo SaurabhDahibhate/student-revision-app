@@ -3,7 +3,7 @@ import axios from "axios";
 const YOUTUBE_API_URL = "https://www.googleapis.com/youtube/v3/search";
 
 // DON'T read env var here - read it inside the function
-// const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY; 
+// const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 
 // Extract key topics from PDF text
 function extractTopics(text, pdfName) {
@@ -45,13 +45,6 @@ export async function searchYouTubeVideos(pdfId, PDF) {
     // Read API key HERE, inside the function (after dotenv has loaded)
     const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 
-    console.log(
-      "🔑 YouTube API Key in function:",
-      YOUTUBE_API_KEY
-        ? `✅ Yes (${YOUTUBE_API_KEY.substring(0, 10)}...)`
-        : "❌ No"
-    );
-
     const pdf = await PDF.findById(pdfId);
     if (!pdf) {
       throw new Error("PDF not found");
@@ -66,7 +59,6 @@ export async function searchYouTubeVideos(pdfId, PDF) {
     }
 
     const searchQuery = extractTopics(pdf.textContent, pdf.originalName);
-    console.log("🔍 YouTube search query:", searchQuery);
 
     const response = await axios.get(YOUTUBE_API_URL, {
       params: {

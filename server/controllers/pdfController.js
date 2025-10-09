@@ -1,3 +1,5 @@
+import QuizAttempt from "../models/QuizAttempt.js";
+import Quiz from "../models/Quiz.js";
 import PDF from "../models/PDF.js";
 import fs from "fs";
 import path from "path";
@@ -15,12 +17,8 @@ export const uploadPDF = async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    console.log("📤 Processing PDF upload:", req.file.originalname);
-
     // Read PDF file
     const dataBuffer = fs.readFileSync(req.file.path);
-
-    console.log("📦 Buffer size:", dataBuffer.length, "bytes");
 
     let pageCount = 1;
     let textContent = "";
@@ -29,7 +27,6 @@ export const uploadPDF = async (req, res) => {
     try {
       const pdfDoc = await PDFDocument.load(dataBuffer);
       pageCount = pdfDoc.getPageCount();
-      console.log("✅ pdf-lib: Found", pageCount, "pages");
     } catch (pdfLibError) {
       console.error("⚠️ pdf-lib error:", pdfLibError.message);
     }
@@ -43,25 +40,12 @@ export const uploadPDF = async (req, res) => {
       // If pdf-lib failed, use pdf-parse page count
       if (pageCount === 1 && pdfData.numpages > 1) {
         pageCount = pdfData.numpages;
-        console.log("✅ pdf-parse: Found", pageCount, "pages");
       }
 
       textContent = pdfData.text || "";
-      console.log(
-        "✅ Extracted text length:",
-        textContent.length,
-        "characters"
-      );
     } catch (parseError) {
       console.error("⚠️ pdf-parse error:", parseError.message);
     }
-
-    console.log("📊 Final PDF Info:", {
-      filename: req.file.originalname,
-      pages: pageCount,
-      textLength: textContent.length,
-      size: req.file.size,
-    });
 
     // Save PDF metadata to database
     const newPDF = new PDF({
@@ -75,8 +59,6 @@ export const uploadPDF = async (req, res) => {
     });
 
     await newPDF.save();
-
-    console.log("💾 Saved to database with", newPDF.pageCount, "pages");
 
     res.status(201).json({
       message: "PDF uploaded successfully",
@@ -99,10 +81,7 @@ export const getAllPDFs = async (req, res) => {
   try {
     const pdfs = await PDF.find().sort({ uploadedAt: -1 });
 
-    console.log("📚 Fetching PDFs from DB:", pdfs.length);
-
     const pdfList = pdfs.map((pdf) => {
-      console.log("  -", pdf.originalName, ":", pdf.pageCount, "pages");
       return {
         id: pdf._id,
         name: pdf.originalName,
@@ -183,7 +162,11 @@ export const deletePDF = async (req, res) => {
     if (fs.existsSync(pdf.filePath)) {
       fs.unlinkSync(pdf.filePath);
     }
+    // Delete related quiz attempts
+    await QuizAttempt.deleteMany({ pdfId: req.params.id });
 
+    // Delete related quizzes
+    await Quiz.deleteMany({ pdfId: req.params.id });
     // Delete from database
     await PDF.findByIdAndDelete(req.params.id);
 

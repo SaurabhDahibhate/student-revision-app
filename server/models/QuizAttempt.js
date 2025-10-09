@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const answerSchema = new mongoose.Schema({
   questionId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String, // CHANGE FROM ObjectId TO String
     required: true,
   },
   userAnswer: {
@@ -31,7 +31,10 @@ const quizAttemptSchema = new mongoose.Schema(
       ref: "PDF",
       required: true,
     },
-    answers: [answerSchema],
+    pdfName: {
+      type: String,
+      required: true,
+    },
     score: {
       type: Number,
       required: true,
@@ -44,6 +47,7 @@ const quizAttemptSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    answers: [answerSchema],
     completedAt: {
       type: Date,
       default: Date.now,
