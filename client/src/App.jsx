@@ -155,9 +155,9 @@ function App() {
                   : "bg-red-500"
               }`}
             ></div>
-            <span className="text-sm font-medium text-gray-700">
+            {/* <span className="text-sm font-medium text-gray-700">
               {backendStatus}
-            </span>
+            </span> */}
           </div>
         </div>
 
