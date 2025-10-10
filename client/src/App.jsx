@@ -116,10 +116,10 @@ function App() {
       <div className="container mx-auto px-4 py-8 relative z-10">
         {/* Hero Header */}
         <div className="text-center mb-12 animate-fadeIn">
-          <div className="flex items-center justify-between max-w-6xl mx-auto mb-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between max-w-6xl mx-auto mb-6 gap-4">
             <button
               onClick={() => setShowChat(true)}
-              className="group px-5 py-3 bg-white text-purple-600 rounded-xl hover:bg-purple-600 hover:text-white transition-all duration-300 flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl hover:scale-105"
+              className="group w-full md:w-auto px-5 py-3 bg-white text-purple-600 rounded-xl hover:bg-purple-600 hover:text-white transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-lg hover:shadow-xl hover:scale-105"
             >
               <MessageSquare className="w-5 h-5" />
               <span>AI Chat</span>
@@ -127,20 +127,20 @@ function App() {
 
             <div className="text-center">
               <div className="flex items-center justify-center gap-3 mb-2">
-                <Sparkles className="w-10 h-10 text-yellow-500 animate-pulse" />
-                <h1 className="text-5xl font-extrabold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
+                <Sparkles className="w-8 md:w-10 h-8 md:h-10 text-yellow-500 animate-pulse" />
+                <h1 className="text-3xl md:text-5xl font-extrabold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
                   ReviseAI
                 </h1>
-                <Sparkles className="w-10 h-10 text-yellow-500 animate-pulse" />
+                <Sparkles className="w-8 md:w-10 h-8 md:h-10 text-yellow-500 animate-pulse" />
               </div>
-              <p className="text-xl text-gray-600 font-medium">
+              <p className="text-lg md:text-xl text-gray-600 font-medium">
                 Your AI-Powered Study Companion 🚀
               </p>
             </div>
 
             <button
               onClick={() => setShowDashboard(true)}
-              className="group px-5 py-3 bg-white text-green-600 rounded-xl hover:bg-green-600 hover:text-white transition-all duration-300 flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl hover:scale-105"
+              className="group w-full md:w-auto px-5 py-3 bg-white text-green-600 rounded-xl hover:bg-green-600 hover:text-white transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-lg hover:shadow-xl hover:scale-105"
             >
               <TrendingUp className="w-5 h-5" />
               <span>Dashboard</span>
