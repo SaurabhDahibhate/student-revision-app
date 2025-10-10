@@ -14,6 +14,7 @@ export default function ChatInterface({
   initialPdfId = null,
   initialPdfName = null,
 }) {
+  const [showSidebar, setShowSidebar] = useState(false);
   const [chats, setChats] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
   const [currentChat, setCurrentChat] = useState(null);
@@ -131,10 +132,31 @@ export default function ChatInterface({
 
   return (
     <div className="fixed inset-0 bg-gray-900 z-50 flex">
+      {/* Mobile Overlay */}
+      {showSidebar && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setShowSidebar(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col">
+      <div
+        className={`${
+          showSidebar ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0 fixed lg:relative w-80 bg-gray-800 border-r border-gray-700 flex flex-col transition-transform duration-300 z-50 h-full`}
+      >
         {/* Sidebar Header */}
         <div className="p-4 border-b border-gray-700">
+          <div className="flex items-center justify-between mb-3 lg:hidden">
+            <h3 className="text-white font-semibold">Chats</h3>
+            <button
+              onClick={() => setShowSidebar(false)}
+              className="p-2 hover:bg-gray-700 rounded-lg"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
+          </div>
           <button
             onClick={handleNewChat}
             className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg flex items-center justify-center gap-2 transition-colors"
@@ -157,7 +179,10 @@ export default function ChatInterface({
               {chats.map((chat) => (
                 <div
                   key={chat.id}
-                  onClick={() => loadChat(chat.id)}
+                  onClick={() => {
+                    loadChat(chat.id);
+                    setShowSidebar(false);
+                  }}
                   className={`group p-3 rounded-lg cursor-pointer transition-colors ${
                     currentChatId === chat.id
                       ? "bg-gray-700"
@@ -212,29 +237,36 @@ export default function ChatInterface({
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col bg-gray-50">
         {/* Chat Header */}
-        <div className="bg-white border-b border-gray-200 p-4">
+        <div className="bg-white border-b border-gray-200 p-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-800">
-                {currentChat?.title || "New Conversation"}
-              </h2>
-              {currentChat?.pdfName && (
-                <p className="text-sm text-blue-600 mt-1">
-                  📄 Context: {currentChat.pdfName}
-                </p>
-              )}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowSidebar(true)}
+                className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <MessageSquare className="w-5 h-5" />
+              </button>
+              <div>
+                <h2 className="text-lg lg:text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                  {currentChat?.title || "New Conversation"}
+                </h2>
+                {currentChat?.pdfName && (
+                  <p className="text-xs lg:text-sm text-blue-600 mt-1 font-medium">
+                    📄 Context: {currentChat.pdfName}
+                  </p>
+                )}
+              </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors lg:hidden"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        {/* Messages */}
-        {/* Messages */}
+        {/* Messages - rest stays same */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {!currentChat ||
           !currentChat.messages ||
@@ -257,23 +289,29 @@ export default function ChatInterface({
                   key={index}
                   className={`flex ${
                     msg.role === "user" ? "justify-end" : "justify-start"
-                  }`}
+                  } animate-slideUp`}
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div
-                    className={`max-w-3xl rounded-2xl px-4 py-3 ${
+                    className={`max-w-[85%] lg:max-w-3xl rounded-2xl px-4 lg:px-5 py-3 shadow-md ${
                       msg.role === "user"
-                        ? "bg-blue-600 text-white"
-                        : "bg-white text-gray-800 border border-gray-200"
+                        ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+                        : "bg-white text-gray-800 border-2 border-gray-200"
                     }`}
                   >
                     {msg.role === "user" ? (
-                      <p className="whitespace-pre-wrap">{msg.content}</p>
+                      <p className="whitespace-pre-wrap text-sm lg:text-base">
+                        {msg.content}
+                      </p>
                     ) : (
                       <div className="prose prose-sm max-w-none">
                         <ReactMarkdown
                           components={{
                             p: ({ node, ...props }) => (
-                              <p className="mb-2 last:mb-0" {...props} />
+                              <p
+                                className="mb-2 last:mb-0 text-sm lg:text-base"
+                                {...props}
+                              />
                             ),
                             strong: ({ node, ...props }) => (
                               <strong
@@ -357,22 +395,22 @@ export default function ChatInterface({
         </div>
 
         {/* Input Area */}
-        <div className="bg-white border-t border-gray-200 p-4">
-          <form onSubmit={handleSendMessage} className="flex gap-3">
+        <div className="bg-white border-t border-gray-200 p-3 lg:p-4">
+          <form onSubmit={handleSendMessage} className="flex gap-2 lg:gap-3">
             <input
               type="text"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Type your message..."
               disabled={sendingMessage}
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 disabled:bg-gray-100"
+              className="flex-1 px-3 lg:px-4 py-2 lg:py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-purple-500 disabled:bg-gray-100 text-sm lg:text-base"
             />
             <button
               type="submit"
               disabled={!message.trim() || sendingMessage}
-              className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              className="px-4 lg:px-6 py-2 lg:py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105 disabled:transform-none"
             >
-              <Send className="w-5 h-5" />
+              <Send className="w-4 lg:w-5 h-4 lg:h-5" />
               <span className="hidden sm:inline">Send</span>
             </button>
           </form>
