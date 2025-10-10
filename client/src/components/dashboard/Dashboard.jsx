@@ -75,7 +75,7 @@ export default function Dashboard({ onClose }) {
           <div className="p-6 border-b bg-gradient-to-r from-green-600 to-blue-600 rounded-t-lg">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-3xl font-bold text-white">
+                <h2 className="text-2xl font-bold text-white">
                   📊 Progress Dashboard
                 </h2>
                 <p className="text-green-100 mt-1">

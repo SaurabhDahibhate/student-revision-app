@@ -194,9 +194,9 @@ function App() {
         </div>
 
         {/* Main Content */}
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 items-start">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
           {/* Upload Section */}
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-gray-200 hover:shadow-2xl transition-all duration-300 animate-slideUp h-[500px] flex flex-col">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 lg:p-8 border border-gray-200 hover:shadow-2xl transition-all duration-300 animate-slideUp h-auto lg:h-[650px] flex flex-col">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl">
                 <BookOpen className="w-6 h-6 text-white" />
@@ -207,7 +207,7 @@ function App() {
           </div>
 
           {/* PDF List Section */}
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-gray-200 hover:shadow-2xl transition-all duration-300 animate-slideUp animation-delay-200 h-[500px] flex flex-col">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 lg:p-8 border border-gray-200 hover:shadow-2xl transition-all duration-300 animate-slideUp animation-delay-200 h-auto lg:h-[650px] flex flex-col">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">

@@ -94,43 +94,31 @@ export default function Quiz({ quiz, onClose }) {
 
           {/* Result Summary */}
           {submitted && result && (
-            <div
-              className={`m-6 p-6 rounded-2xl border-2 ${getScoreBgColor(
-                result.percentage
-              )}`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="p-4 bg-white rounded-full">
-                    <Award
-                      className={`w-12 h-12 ${getScoreColor(
-                        result.percentage
-                      )}`}
-                    />
+            <div className={`m-4 lg:m-6 p-4 lg:p-6 rounded-2xl border-2 ${getScoreBgColor(result.percentage)}`}>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-white rounded-full">
+                    <Award className={`w-10 h-10 lg:w-12 lg:h-12 ${getScoreColor(result.percentage)}`} />
                   </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-800 mb-1">
+                  <div className="text-center sm:text-left">
+                    <h3 className="text-xl lg:text-2xl font-bold text-gray-800 mb-1">
                       Score: {result.score}/{result.totalQuestions}
                     </h3>
-                    <p
-                      className={`text-3xl font-bold ${getScoreColor(
-                        result.percentage
-                      )}`}
-                    >
+                    <p className={`text-2xl lg:text-3xl font-bold ${getScoreColor(result.percentage)}`}>
                       {result.percentage}%
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                    <span className="text-green-700 font-semibold">
+                <div className="flex sm:flex-col gap-4 sm:gap-2 text-center sm:text-right">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 lg:w-5 lg:h-5 text-green-600" />
+                    <span className="text-sm lg:text-base text-green-700 font-semibold">
                       {result.correctAnswers} Correct
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <XCircle className="w-5 h-5 text-red-600" />
-                    <span className="text-red-700 font-semibold">
+                    <XCircle className="w-4 h-4 lg:w-5 lg:h-5 text-red-600" />
+                    <span className="text-sm lg:text-base text-red-700 font-semibold">
                       {result.incorrectAnswers} Incorrect
                     </span>
                   </div>
@@ -290,14 +278,14 @@ export default function Quiz({ quiz, onClose }) {
                   <>
                     <button
                       onClick={handleRetry}
-                      className="px-6 py-3 bg-white border-2 border-purple-500 text-purple-600 rounded-xl hover:bg-purple-50 transition-all duration-200 font-semibold flex items-center gap-2"
+                      className="px-6 py-3 bg-white border-2 border-purple-500 text-purple-600 rounded-xl hover:bg-purple-50 transition-all duration-200 font-semibold flex items-center gap-2 text-sm"
                     >
                       <RotateCcw className="w-5 h-5" />
                       Retry Quiz
                     </button>
                     <button
                       onClick={onClose}
-                      className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 font-semibold shadow-md"
+                      className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 font-semibold shadow-md text-sm"
                     >
                       Close
                     </button>
@@ -306,23 +294,24 @@ export default function Quiz({ quiz, onClose }) {
                   <>
                     <button
                       onClick={onClose}
-                      className="px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-semibold"
+                      className="px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-semibold text-sm
+                      "
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleSubmit}
                       disabled={submitting || Object.keys(answers).length === 0}
-                      className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-200 font-semibold flex items-center gap-2 shadow-md"
+                      className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-200 font-semibold flex items-center gap-2 shadow-md text-sm"
                     >
                       {submitting ? (
                         <>
-                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin text-sm" />
                           Submitting...
                         </>
                       ) : (
                         <>
-                          <Send className="w-5 h-5" />
+                          <Send className="w-5 h-5 text-sm" />
                           Submit Quiz
                         </>
                       )}
