@@ -39,7 +39,7 @@ function App() {
         setBackendStatus(`✅ ${data.status}`);
       })
       .catch((err) => {
-        setBackendStatus("❌ Backend not connected");
+        setBackendStatus("❌ Server Starting.... ");
       });
 
     loadPDFs();
@@ -133,6 +133,7 @@ function App() {
                 </h1>
                 <Sparkles className="w-8 md:w-10 h-8 md:h-10 text-yellow-500 animate-pulse" />
               </div>
+
               <p className="text-lg md:text-xl text-gray-600 font-medium">
                 Your AI-Powered Study Companion 🚀
               </p>
@@ -147,7 +148,7 @@ function App() {
             </button>
           </div>
 
-          {/* <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-md">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-md">
             <div
               className={`w-2 h-2 rounded-full ${
                 backendStatus.includes("✅")
@@ -158,7 +159,7 @@ function App() {
             <span className="text-sm font-medium text-gray-700">
               {backendStatus}
             </span>
-          </div> */}
+          </div>
         </div>
 
         {/* Feature Cards */}
